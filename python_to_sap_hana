@@ -1,0 +1,48 @@
+#Import packages
+import platform
+from hdbcli import dbapi
+
+#verify the architecture of Python
+print ("Platform architecture: " + platform.architecture()[0])
+
+#Using function dbapi.connect to establish a connection with your sap system. 
+conn = dbapi.connect(
+    address='10.7.168.11',
+    port='39015',
+    user='User1',
+    password='Password1',
+
+    #Additional parameters
+    #encrypt=True, # must be set to True when connecting to HANA as a Service
+    #As of SAP HANA Client 2.6, connections on port 443 enable encryption by default (HANA Cloud)
+    #sslValidateCertificate=False #Must be set to false when connecting
+    #to an SAP HANA, express edition instance that uses a self-signed certificate.
+)
+print('connected')
+
+cursor = conn.cursor()
+
+sql = "select * from SYS_BIC.TCURR where TCURR = 'EUR';"
+
+cursor.execute(sql)
+
+rows = cursor.fetchall()
+
+for row in rows:
+    for col in row:
+        print ("%s" % col, end=" ")
+    print ("  ")
+cursor.close()
+print("\n")
+
+#Call Stored Procedure
+sql_command2 = "call USERSCHEMA.STOREDPROC(?,?);"
+parameters = [11, "2020-12-24"]
+cursor.execute(sql_command2, parameters)
+rows = cursor.fetchall()
+for row in rows:
+    for col in row:
+        print ("%s" % col, end=" ")
+    print (" ")
+cursor.close()
+conn.close()
